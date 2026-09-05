@@ -1,0 +1,23 @@
+name: Windows build and source checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Check source and PowerShell syntax
+        shell: pwsh
+        run: ./tools/check-source.ps1
+      - name: Fetch and verify pinned Yubico SDK
+        shell: pwsh
+        run: ./tools/fetch-dependencies.ps1
+      - name: Build and run native tests
+        shell: pwsh
+        run: ./tools/build.ps1
