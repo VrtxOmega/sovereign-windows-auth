@@ -11,6 +11,10 @@ Touch proves physical presence. Anyone with an enrolled key and access to this
 PC can touch it. This is deliberately a possession-based alternative to entering
 the PIN; it is not two-factor sign-in. Keep the recovery key separately.
 
+The ordinary PIN option can still sign in without a YubiKey. A proposed
+[key-required mode and recovery design](KEY_REQUIRED_DESIGN.md) describes the next
+step; it is not implemented or enabled in this release.
+
 ## Trust boundaries
 
 The design assumes the Windows installation, administrator/SYSTEM account,
