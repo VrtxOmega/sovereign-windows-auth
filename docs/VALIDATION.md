@@ -18,6 +18,8 @@ account identifiers and private enrollment artifacts are omitted.
 | Completed-proof cancellation | Real touch followed by deselection could not authorize login after refresh/reselection |
 | Desktop key 1 and key 2 | User confirmed both physical keys unlocked the actual desktop without PIN entry or facial scan |
 | Windows success results | `ReportResult` status/substatus zero at 22:55:26.772Z and 22:56:21.408Z |
+| Offline desktop unlock | User confirmed both keys worked with networking disconnected; corresponding successful Windows results at 23:20:30.661Z and 23:20:42.173Z |
+| Sleep/resume unlock | User confirmed both keys after separate sleep/wake cycles; Kernel-Power events 506/507 and successful Windows results at 23:21:44.150Z and 23:22:08.929Z corroborate Modern Standby resume |
 | Recovery availability | Native PIN remained enabled and had been used successfully during earlier lock-screen tests |
 
 The installed provider for these desktop results has SHA-256:
@@ -30,6 +32,14 @@ It is preserved locally with the `prototype-2026-09-05` source tag. This hash
 identifies the tested local DLL; it does not imply reproducible binaries across
 different compiler environments. The project does not publish that local binary
 checkpoint, enrollment data or raw logs as a release.
+
+The portable setup was additionally checked with a fresh SDK download, a clean
+local build and a new Python environment. The first public
+[GitHub Windows CI run](https://github.com/VrtxOmega/sovereign-windows-auth/actions/runs/33998381030)
+passed source checks, dependency verification and all three native suites at
+revision `92d492bf55ad9e0f11d5877c34e17eed7de0623e`. PowerShell scripts also parsed
+successfully in Windows PowerShell 5.1 and PowerShell 7. CI ran on Windows Server
+2022; this establishes build/test portability, not Server desktop-login support.
 
 ## The display-refresh defect
 
@@ -52,14 +62,14 @@ proof. Actual desktop unlock then passed with each key.
 Record each result with build number, source revision, key model/firmware and
 whether PIN/face fallback was used. Keep a tested recovery route available.
 
-- [ ] Unlock each key while network access is disabled, then restore networking.
-- [ ] Sleep/resume and unlock with each key.
+- [x] Unlock each key while network access is disabled, then restore networking.
+- [x] Sleep/resume and unlock with each key.
 - [ ] Restart, then perform a cold sign-in with each key in separate runs.
 - [ ] Start with no key connected; confirm bounded failure and native PIN recovery.
 - [ ] Insert an unrelated key; confirm no successful Sovereign authentication.
 - [ ] Validate fresh setup and recovery on an additional PC.
 - [ ] Revalidate after a Windows update, including the stock PIN callback ABI.
 
-Reboot/offline/sleep results must not be inferred from ordinary Win+L unlock.
+Reboot, offline and sleep results must not be inferred from ordinary Win+L unlock.
 CI cannot establish hardware or lock-screen success. Newly published setup
 portability changes also need a fresh-machine installation test.
