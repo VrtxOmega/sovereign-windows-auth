@@ -20,6 +20,7 @@ account identifiers and private enrollment artifacts are omitted.
 | Windows success results | `ReportResult` status/substatus zero at 22:55:26.772Z and 22:56:21.408Z |
 | Offline desktop unlock | User confirmed both keys worked with networking disconnected; corresponding successful Windows results at 23:20:30.661Z and 23:20:42.173Z |
 | Sleep/resume unlock | User confirmed both keys after separate sleep/wake cycles; Kernel-Power events 506/507 and successful Windows results at 23:21:44.150Z and 23:22:08.929Z corroborate Modern Standby resume |
+| First sign-in after restart | User confirmed each key after its own restart; separate Kernel-General startup events at 23:27:11Z and 23:28:18Z precede successful Windows results at 23:27:41.912Z and 23:28:48.028Z |
 | Recovery availability | Native PIN remained enabled and had been used successfully during earlier lock-screen tests |
 
 The installed provider for these desktop results has SHA-256:
@@ -32,6 +33,11 @@ It is preserved locally with the `prototype-2026-09-05` source tag. This hash
 identifies the tested local DLL; it does not imply reproducible binaries across
 different compiler environments. The project does not publish that local binary
 checkpoint, enrollment data or raw logs as a release.
+
+Restart verification used the same installed DLL hash and Windows build 26200.
+These were two separate Windows restarts and first sign-ins, not merely session
+locks. Full shutdown/power-on, hibernation and offline first sign-in after restart
+are separate scenarios and have not been established by these results.
 
 The portable setup was additionally checked with a fresh SDK download, a clean
 local build and a new Python environment. The first public
@@ -64,7 +70,7 @@ whether PIN/face fallback was used. Keep a tested recovery route available.
 
 - [x] Unlock each key while network access is disabled, then restore networking.
 - [x] Sleep/resume and unlock with each key.
-- [ ] Restart, then perform a cold sign-in with each key in separate runs.
+- [x] Restart, then perform first sign-in with each key in separate runs.
 - [ ] Start with no key connected; confirm bounded failure and native PIN recovery.
 - [ ] Insert an unrelated key; confirm no successful Sovereign authentication.
 - [ ] Validate fresh setup and recovery on an additional PC.

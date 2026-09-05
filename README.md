@@ -9,9 +9,9 @@ PIN remains available for recovery.
 
 **Experimental, with actual desktop unlock verified on Windows 11 Pro x64 build
 26200 using two physical YubiKeys.** This is a source release for developers and
-careful testing. Both keys also passed offline and sleep/resume desktop unlock.
-Reboot, additional PCs and Windows versions still need validation. There is no signed
-end-user installer yet.
+careful testing. Both keys also passed offline unlock, sleep/resume and first
+sign-in after separate restarts. Additional PCs and Windows versions still need
+validation. There is no signed end-user installer yet.
 
 ## How it works
 
