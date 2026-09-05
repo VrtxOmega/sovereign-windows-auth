@@ -1,0 +1,12 @@
+#include <windows.h>
+101 DIALOGEX 0, 0, 300, 125
+STYLE DS_MODALFRAME | DS_SETFONT | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Sovereign - Windows PIN check"
+FONT 9, "Segoe UI"
+BEGIN
+    LTEXT "Enter the numerical PIN you use to unlock this PC.\nThis is your Windows PIN, not your YubiKey PIN.", 1001, 12, 10, 276, 28
+    LTEXT "Windows PIN", 1003, 12, 44, 276, 10
+    EDITTEXT 1002, 12, 58, 276, 18, ES_PASSWORD | ES_NUMBER | ES_AUTOHSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON "Check PIN", IDOK, 154, 94, 64, 18
+    PUSHBUTTON "Cancel", IDCANCEL, 224, 94, 64, 18
+END

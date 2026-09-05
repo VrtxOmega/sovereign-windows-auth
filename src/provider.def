@@ -1,0 +1,4 @@
+LIBRARY SovereignCredentialProvider
+EXPORTS
+    DllGetClassObject PRIVATE
+    DllCanUnloadNow PRIVATE
