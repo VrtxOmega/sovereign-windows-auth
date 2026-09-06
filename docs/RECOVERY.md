@@ -1,5 +1,11 @@
 # Recovery
 
+The instructions below cover the installed credential provider, which keeps
+native PIN recovery available. The separate, optional filter experiment has
+[offline recovery tooling](FILTER_RECOVERY.md); it is not installed by the normal
+provider installer and must not be activated on a physical PC on the strength
+of private-hive tests alone.
+
 Before installation, confirm that you can unlock this account using the ordinary
 Windows PIN option. Keep that option available while testing Sovereign. If
 Sovereign fails, choose **Sign-in options → PIN** and use your existing Windows PIN.

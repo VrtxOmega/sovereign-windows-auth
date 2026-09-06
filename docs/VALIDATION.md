@@ -63,15 +63,38 @@ invalidation for actual deselection. The host reproduces the observed refresh
 order, and a separate real-key negative test checks cancellation of a completed
 proof. Actual desktop unlock then passed with each key.
 
-## Next manual checks
+## Filter and recovery experiment, 2026-09-06 UTC
 
 The separate `swa_filter_lab` experiment subsequently passed its native contract
 suite alongside all three existing suites. It covers passive modes, missing
 preconditions, unsupported scenarios/flags, known/unknown providers, existing
 exclusions, absent/unavailable Sovereign, invalid input, COM identity and remote
 credential rejection. This process never registers a filter or changes sign-in.
-These results do not establish actual LogonUI restriction or independent recovery;
-see the [key-required design](KEY_REQUIRED_DESIGN.md).
+The subsequent optional QEMU DLL and private-hive recovery suite bring the native
+total to six passing suites. The DLL contract test loads the module without
+registration or enrollment and verifies COM lifetime, passive operation on an
+unconfigured/physical host and rejection of remote credential forwarding.
+The recovery suite uses a real private registry hive to verify exact-key removal,
+preservation of neighboring filter/provider/COM markers, repeat execution,
+unexpected-child refusal and persistence after reopening. The recovery executable
+also refused to operate from the working physical Windows desktop.
+
+A disposable Windows 11 Pro x64 build 26200 guest, with Secure Boot and TPM ready,
+then exercised the actual sign-in process. A missing provider DLL was omitted
+from Windows' filter list and preserved ordinary password sign-in. A loadable
+provider returning no credentials triggered five known-provider exclusions and
+left no usable sign-in tile. WinPE recovery removed only the filter registration;
+the ordinary password tile returned and sign-in reached the desktop. A replay
+from the saved broken state returned exit code zero and confirmed preservation
+of the stock PIN/password, Sovereign provider and filter COM registrations.
+
+These are real VM recovery results. They do not establish hidden-PIN compatibility
+with the real key bridge, encrypted-volume recovery or physical-PC activation.
+No physical key or enrollment was attached to the VM. Details, the initial lab
+reporting defect and the recovery artifact hash are recorded in
+[offline filter recovery](FILTER_RECOVERY.md).
+
+## Next manual checks
 
 Record each result with build number, source revision, key model/firmware and
 whether PIN/face fallback was used. Keep a tested recovery route available.

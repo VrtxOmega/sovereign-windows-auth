@@ -1,4 +1,4 @@
-param([string]$BuildDirectory = '', [string]$FidoRoot = '')
+param([string]$BuildDirectory = '', [string]$FidoRoot = '', [switch]$WithVmFilter)
 $ErrorActionPreference = 'Stop'
 $taskRoot = Split-Path $PSScriptRoot
 if (-not $BuildDirectory) { $BuildDirectory = Join-Path $taskRoot 'build' }
@@ -17,7 +17,8 @@ if (-not $taskCmake) {
 }
 $taskCtest = Join-Path (Split-Path $taskCmake) 'ctest.exe'
 if (-not (Test-Path -LiteralPath $taskCtest)) { throw 'ctest.exe must accompany cmake.exe.' }
-& $taskCmake -S $taskRoot -B $BuildDirectory -G 'Visual Studio 17 2022' -A x64 "-DFIDO_ROOT=$FidoRoot"
+$taskVmFilter = if ($WithVmFilter) { 'ON' } else { 'OFF' }
+& $taskCmake -S $taskRoot -B $BuildDirectory -G 'Visual Studio 17 2022' -A x64 "-DFIDO_ROOT=$FidoRoot" "-DSWA_BUILD_VM_FILTER=$taskVmFilter"
 if ($LASTEXITCODE -ne 0) { throw 'CMake configuration failed' }
 & $taskCmake --build $BuildDirectory --config Release
 if ($LASTEXITCODE -ne 0) { throw 'Native compilation failed' }

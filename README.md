@@ -60,10 +60,11 @@ The [validation record](docs/VALIDATION.md) distinguishes actual hardware and
 lock-screen results from automated checks. The initial working implementation is
 preserved by the `prototype-2026-09-05` Git tag.
 
-Four native automated suites cover cryptography/profile parsing, the credential
-provider contract, Windows credential serialization and an isolated filter
-experiment. The [key-required design](docs/KEY_REQUIRED_DESIGN.md) explains that
-experiment and its remaining recovery requirements. CI builds and runs the suites
+Five native automated suites cover cryptography/profile parsing, the credential
+provider contract, Windows credential serialization, an isolated filter experiment
+and offline recovery against a private registry hive. An optional sixth suite
+checks the QEMU-only filter DLL. The [key-required design](docs/KEY_REQUIRED_DESIGN.md)
+explains these experiments and their remaining recovery requirements. CI builds and runs the suites
 without enrolling hardware or registering a sign-in provider. Hardware and real
 lock-screen tests remain manual.
 

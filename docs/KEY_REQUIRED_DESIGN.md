@@ -1,9 +1,10 @@
 # Requiring a key for desktop sign-in
 
-Status: isolated filter experiment. The filter interface and its decision tests
-exist only in `swa_filter_lab.exe`. There is no filter DLL, registration, activation
-command or live configuration. Recovery codes are not implemented. The ordinary
-Windows PIN remains available in the current release.
+Status: isolated filter and recovery experiments. The ordinary test executable is
+joined by an optional QEMU-only filter DLL and an offline recovery executable.
+No filter is installed on the working physical PC, and the VM DLL cannot be
+enabled there through configuration. Recovery codes are not implemented. The
+ordinary Windows PIN remains available in the current release.
 
 ## Intended behavior
 
@@ -42,13 +43,20 @@ convenience entries are excluded only for local logon/unlock with zero flags.
 Unknown providers and exclusions made by other filters remain unchanged. Remote
 credential handling returns `E_NOTIMPL` without forwarding credentials.
 
-Local native compilation with warnings treated as errors and all four automated
-suites passed on Windows build 26200. This establishes interface/decision behavior
-in the lab, not hidden-PIN sign-in or recovery. An inventory on that machine also
+Local native compilation with warnings treated as errors and all six automated
+suites passed on Windows build 26200, including the optional VM DLL and offline
+recovery fixture. This establishes interface/decision behavior
+in the lab, not hidden-PIN sign-in. An inventory on that machine also
 found unreviewed provider registrations; the experiment cannot claim complete
 key-only enforcement. The installed runtime hash remains unchanged.
 
-### Live implementation still pending
+The [offline recovery experiment](FILTER_RECOVERY.md) removes only the filter's
+registration from an offline Windows hive. This passed in a disposable Windows
+machine after a loadable but unusable provider left no sign-in tile: WinPE recovery
+restored ordinary password sign-in while preserving the other registrations.
+Physical recovery and hidden-PIN bridge validation are still pending.
+
+### Physical implementation still pending
 
 A separately registered `ICredentialProviderFilter` can control which known
 providers LogonUI enumerates for `CPUS_LOGON` and `CPUS_UNLOCK_WORKSTATION`.

@@ -1,0 +1,4 @@
+LIBRARY SovereignCredentialFilterVm
+EXPORTS
+    DllGetClassObject PRIVATE
+    DllCanUnloadNow PRIVATE

@@ -5,8 +5,8 @@
 #include <atomic>
 #include "provider_id.h"
 
-// This object is linked only into an isolated executable. It has no DLL exports,
-// COM registration or configuration path into the installed sign-in provider.
+// Decision policy for the isolated executable and optional QEMU-only test DLL.
+// It has no configuration path into the installed key credential provider.
 namespace swa::lab {
 enum class Mode { Disabled, Diagnostic, SimulateRestriction };
 struct Preconditions {
