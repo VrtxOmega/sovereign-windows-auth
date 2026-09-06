@@ -33,9 +33,11 @@ firmware check is an experiment guard, not an authentication boundary.
 Keep a verified copy of the recovery executable on separately accessible recovery
 media before any future sign-in restriction. Preserve normal disk encryption and
 its existing recovery process. The tool does not unlock encrypted volumes or
-change their protectors. It does not authenticate the operator: access control
-must come from the recovery environment and the volume's encryption/recovery
-route. The lab disk was unencrypted. Its result does not establish protection
+change their protectors. The [paired USB extension](USB_RECOVERY.md) checks a
+private removable-drive credential before recovery on paired installations.
+Legacy unpaired installations retain the original command. Offline write access
+still depends on the volume's encryption/recovery route. The lab disk was
+unencrypted. Its result does not establish protection
 against a person who can already write to the offline Windows disk.
 
 ## Offline command
@@ -51,7 +53,10 @@ The program requires WinRE/WinPE, backup/restore privileges and an explicit loca
 Windows path. It rejects the running environment's volume and paths traversing
 reparse points. Missing hive/kernel files stop the operation before a hive load.
 
-Before loading the original hive, it creates a fresh directory under that offline
+Before loading the original hive, it first inspects a separate temporary copy and
+checks any required USB credential. Wrong or missing credentials on a paired
+installation stop recovery before any target-volume backup or hive load.
+Once authorized, it creates a fresh directory under that offline
 Windows installation's `System32\config`, protected for SYSTEM and administrators,
 and copies `SOFTWARE` plus available `SOFTWARE.LOG1` and `SOFTWARE.LOG2`. It then
 loads the hive under a unique temporary registry mount, checks its Windows

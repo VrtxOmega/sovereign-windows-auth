@@ -18,5 +18,12 @@ out/
 *.dmp
 *.log
 *.zip
+*.iso
+*.wim
+*.hive
+*.img
+*.qcow2
+*.vhd
+*.vhdx
 .env
 .env.*

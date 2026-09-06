@@ -43,7 +43,7 @@ convenience entries are excluded only for local logon/unlock with zero flags.
 Unknown providers and exclusions made by other filters remain unchanged. Remote
 credential handling returns `E_NOTIMPL` without forwarding credentials.
 
-Local native compilation with warnings treated as errors and all six automated
+Local native compilation with warnings treated as errors and all seven automated
 suites passed on Windows build 26200, including the optional VM DLL and offline
 recovery fixture. This establishes interface/decision behavior
 in the lab, not hidden-PIN sign-in. An inventory on that machine also
@@ -54,7 +54,10 @@ The [offline recovery experiment](FILTER_RECOVERY.md) removes only the filter's
 registration from an offline Windows hive. This passed in a disposable Windows
 machine after a loadable but unusable provider left no sign-in tile: WinPE recovery
 restored ordinary password sign-in while preserving the other registrations.
-Physical recovery and hidden-PIN bridge validation are still pending.
+The [paired USB extension](USB_RECOVERY.md) additionally passed missing/wrong USB
+refusal, removal of the USB after verification, and recovery to an existing PIN
+that reached the desktop. Physical recovery and hidden-PIN bridge validation are
+still pending.
 
 ### Physical implementation still pending
 

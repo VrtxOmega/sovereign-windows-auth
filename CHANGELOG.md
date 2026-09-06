@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased — recovery experiment
+
+- Pair a removable recovery drive using a random credential and a protected
+  local verifier; refuse silent replacement and malformed or mismatched keys.
+- WinPE recovery screen checks the paired USB before offering to restore normal
+  Windows sign-in options. The PIN and YubiKey enrollment are preserved.
+- Inspect a temporary registry copy before permitting changes to paired offline
+  installations. Keep the exact, non-recursive filter removal and protected backup.
+- Build private bootable recovery media from a user-supplied Windows ISO.
+- Keep filtering disabled on physical hardware; pairing is not disk protection.
+
 ## 0.1.0-alpha.1 — 2026-09-05
 
 First public source preview, licensed under GPL-3.0-only.

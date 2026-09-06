@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <string>
 #include "filter_id.h"
+#include "recovery_usb.h"
 
 namespace {
 class Key {
@@ -96,7 +97,58 @@ void requireRegularFile(const std::wstring& path) {
     if (attributes == INVALID_FILE_ATTRIBUTES || (attributes & (FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_REPARSE_POINT)))
         throw std::runtime_error("Required offline file is missing or is a reparse point");
 }
-void recover(const wchar_t* argument) {
+std::wstring protectedCopy(const std::wstring& directory, const std::wstring& hive) {
+    const auto backup=directory+L"\\SovereignFilterRecovery-"+uniqueName();
+    PSECURITY_DESCRIPTOR security=nullptr;
+    if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(L"D:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)",
+        SDDL_REVISION_1,&security,nullptr)) throw std::runtime_error("Cannot construct protected backup permissions");
+    SECURITY_ATTRIBUTES backupAttributes{sizeof(SECURITY_ATTRIBUTES),security,FALSE};
+    const auto created=CreateDirectoryW(backup.c_str(),&backupAttributes);
+    LocalFree(security);
+    if (!created) throw std::runtime_error("Cannot create a fresh protected recovery directory");
+    for (const auto suffix : {L"",L".LOG1",L".LOG2"}) {
+        const auto source=hive+suffix;
+        const auto attributes=GetFileAttributesW(source.c_str());
+        if (attributes==INVALID_FILE_ATTRIBUTES && GetLastError()==ERROR_FILE_NOT_FOUND && *suffix) continue;
+        requireRegularFile(source);
+        if (!CopyFileW(source.c_str(),(backup+L"\\SOFTWARE"+suffix).c_str(),TRUE))
+            throw std::runtime_error("Registry copy failed; the original hive was not loaded or changed");
+    }
+    return backup;
+}
+void authorizeRecovery(HKEY software, const wchar_t* keyFile, bool inspecting) {
+    if (swa::recovery::paired(software)) swa::recovery::authorize(software,keyFile);
+    else if (keyFile || inspecting) throw std::runtime_error("This Windows installation has no paired recovery USB.");
+}
+void inspectCopy(const std::wstring& hive, const wchar_t* keyFile, bool inspecting) {
+    wchar_t temporary[32768]{};
+    const auto length=GetTempPathW(static_cast<DWORD>(std::size(temporary)),temporary);
+    if (!length || length>=std::size(temporary)) throw std::runtime_error("Cannot locate temporary recovery storage");
+    const auto copy=protectedCopy(temporary,hive);
+    const auto mount=L"SovereignFilterInspect-"+uniqueName();
+    require(RegLoadKeyW(HKEY_LOCAL_MACHINE,mount.c_str(),(copy+L"\\SOFTWARE").c_str()),"Inspect a separate copy of the offline registry");
+    try {
+        Key software;
+        require(RegOpenKeyExW(HKEY_LOCAL_MACHINE,mount.c_str(),0,KEY_READ,software.put()),"Read recovery inspection hive");
+        if (!keyExists(software.get(),L"Microsoft\\Windows NT\\CurrentVersion") || !keyExists(software.get(),L"Classes\\CLSID"))
+            throw std::runtime_error("The target does not have the expected Windows SOFTWARE structure");
+        authorizeRecovery(software.get(),keyFile,inspecting);
+        if (inspecting) std::cout<<"Recovery USB verified for this Windows installation.\n"
+            <<(keyExists(software.get(),SovereignFilterRegistration) ? "Sovereign sign-in restriction is installed.\n" : "No Sovereign sign-in restriction is currently installed.\n")
+            <<"Check complete. The offline Windows installation was not changed.\n";
+        software.close();
+    } catch (...) {
+        const auto unloaded=RegUnLoadKeyW(HKEY_LOCAL_MACHINE,mount.c_str());
+        if (unloaded!=ERROR_SUCCESS) std::cerr<<"Temporary inspection hive could not unload: "<<unloaded<<'\n';
+        throw;
+    }
+    require(RegUnLoadKeyW(HKEY_LOCAL_MACHINE,mount.c_str()),"Unload temporary inspection hive");
+    // Only explicitly named files in our freshly created temporary directory.
+    // If Windows creates additional transaction artifacts, leave them to WinPE.
+    for (const auto suffix : {L"",L".LOG1",L".LOG2"}) DeleteFileW((copy+L"\\SOFTWARE"+suffix).c_str());
+    RemoveDirectoryW(copy.c_str());
+}
+void recover(const wchar_t* argument, const wchar_t* keyFile = nullptr, bool inspecting = false) {
     if (!keyExists(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Control\\MiniNT"))
         throw std::runtime_error("Offline recovery runs only from WinRE/WinPE. No live registry changes were made.");
     const auto root = absoluteWindowsRoot(argument);
@@ -108,23 +160,12 @@ void recover(const wchar_t* argument) {
     requireRegularFile(root + L"\\System32\\ntoskrnl.exe");
     enablePrivilege(SE_BACKUP_NAME);
     enablePrivilege(SE_RESTORE_NAME);
+    // Wrong or missing USB credentials are rejected using a separate hive copy,
+    // before creating a backup on or loading the original Windows installation.
+    inspectCopy(hive,keyFile,inspecting);
+    if (inspecting) return;
     const auto unique = uniqueName();
-    const auto backup = config + L"\\SovereignFilterRecovery-" + unique;
-    PSECURITY_DESCRIPTOR security = nullptr;
-    if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(L"D:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)",
-        SDDL_REVISION_1, &security, nullptr)) throw std::runtime_error("Cannot construct protected backup permissions");
-    SECURITY_ATTRIBUTES backupAttributes{sizeof(SECURITY_ATTRIBUTES), security, FALSE};
-    const auto created = CreateDirectoryW(backup.c_str(), &backupAttributes);
-    LocalFree(security);
-    if (!created) throw std::runtime_error("Cannot create a fresh protected recovery-backup directory");
-    for (const auto suffix : {L"", L".LOG1", L".LOG2"}) {
-        const auto source = hive + suffix;
-        const auto attributes = GetFileAttributesW(source.c_str());
-        if (attributes == INVALID_FILE_ATTRIBUTES && GetLastError() == ERROR_FILE_NOT_FOUND && *suffix) continue;
-        requireRegularFile(source);
-        if (!CopyFileW(source.c_str(), (backup + L"\\SOFTWARE" + suffix).c_str(), TRUE))
-            throw std::runtime_error("Registry backup failed; the original hive was not loaded or changed");
-    }
+    const auto backup = protectedCopy(config,hive);
     const auto mount = L"SovereignFilterRecovery-" + unique;
     if (keyExists(HKEY_LOCAL_MACHINE, mount.c_str())) throw std::runtime_error("Recovery mount already exists");
     require(RegLoadKeyW(HKEY_LOCAL_MACHINE, mount.c_str(), hive.c_str()), "Load offline SOFTWARE hive");
@@ -134,6 +175,7 @@ void recover(const wchar_t* argument) {
         require(RegOpenKeyExW(HKEY_LOCAL_MACHINE, mount.c_str(), 0, KEY_ALL_ACCESS, software.put()), "Open offline SOFTWARE hive");
         if (!keyExists(software.get(), L"Microsoft\\Windows NT\\CurrentVersion") || !keyExists(software.get(), L"Classes\\CLSID"))
             throw std::runtime_error("The target does not have the expected Windows SOFTWARE structure");
+        authorizeRecovery(software.get(),keyFile,false);
         removed = removeRegistration(software.get());
         software.close();
     } catch (...) {
@@ -186,8 +228,13 @@ void selfTest(const wchar_t* directory) {
 int wmain(int argc, wchar_t** argv) {
     try {
         if (argc == 3 && std::wstring(argv[1]) == L"--self-test") selfTest(argv[2]);
-        else if (argc == 3 && std::wstring(argv[1]) == L"--remove-filter") recover(argv[2]);
-        else { std::cout << "Usage: swa_filter_recovery --remove-filter C:\\Windows (from WinRE/WinPE)\n"; return 2; }
+        else if (argc == 2 && std::wstring(argv[1]) == L"--self-test-usb") swa::recovery::selfTestUsb();
+        else if (argc == 3 && std::wstring(argv[1]) == L"--pair-usb") swa::recovery::pairUsb(argv[2]);
+        else if (argc == 3 && std::wstring(argv[1]) == L"--check-usb") swa::recovery::checkLiveUsb(argv[2]);
+        else if (argc == 4 && std::wstring(argv[1]) == L"--inspect-usb") recover(argv[2],argv[3],true);
+        else if ((argc == 3 || argc == 4) && std::wstring(argv[1]) == L"--remove-filter") recover(argv[2],argc==4 ? argv[3] : nullptr);
+        else { std::cout << "From WinRE/WinPE: swa_filter_recovery --remove-filter C:\\Windows E:\\SovereignRecovery\\recovery.key\n"
+            <<"From an administrator desktop: --pair-usb E:\\SovereignRecovery | --check-usb E:\\SovereignRecovery\\recovery.key\n"; return 2; }
         return 0;
     } catch (const std::exception& error) {
         std::cerr << error.what() << '\n';

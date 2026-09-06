@@ -60,13 +60,19 @@ The [validation record](docs/VALIDATION.md) distinguishes actual hardware and
 lock-screen results from automated checks. The initial working implementation is
 preserved by the `prototype-2026-09-05` Git tag.
 
-Five native automated suites cover cryptography/profile parsing, the credential
-provider contract, Windows credential serialization, an isolated filter experiment
-and offline recovery against a private registry hive. An optional sixth suite
+Six native automated suites cover cryptography/profile parsing, the credential
+provider contract, Windows credential serialization, an isolated filter experiment,
+offline recovery against a private registry hive, and recovery USB credentials.
+An optional seventh suite
 checks the QEMU-only filter DLL. The [key-required design](docs/KEY_REQUIRED_DESIGN.md)
 explains these experiments and their remaining recovery requirements. CI builds and runs the suites
 without enrolling hardware or registering a sign-in provider. Hardware and real
 lock-screen tests remain manual.
+
+The experimental [paired USB recovery screen](docs/USB_RECOVERY.md) restores
+ordinary sign-in choices after checking a separately held USB credential. Pairing
+does not enable key-required sign-in or establish protection against offline disk
+modification; disk encryption and physical recovery testing remain separate work.
 
 Contributions are welcome, especially compatibility testing, review of the PIN
 bridge, key revocation and safe enrollment updates. See [CONTRIBUTING.md](CONTRIBUTING.md)

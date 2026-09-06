@@ -11,7 +11,7 @@ if ($taskErrors.Count) { throw ($taskErrors -join "`n") }
 $taskTracked = & git -C $taskRoot ls-files
 if ($LASTEXITCODE -ne 0) { throw 'Could not inspect tracked source files.' }
 foreach ($taskFile in $taskTracked) {
-    if ($taskFile -match '^(artifacts|build|research|\.venv|out)/' -or $taskFile -match '\.(swa|swt|swm|pfx|p12|pem|key|dmp|zip|log|dll|exe)$') {
+    if ($taskFile -match '^(artifacts|build|research|\.venv|out)/' -or $taskFile -match '\.(swa|swt|swm|pfx|p12|pem|key|dmp|zip|log|dll|exe|iso|wim|hive|img|qcow2|vhd|vhdx)$') {
         throw "Private/generated material must not be tracked: $taskFile"
     }
     $taskLines = Get-Content -LiteralPath (Join-Path $taskRoot $taskFile)
