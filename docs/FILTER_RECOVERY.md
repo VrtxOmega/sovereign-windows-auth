@@ -1,8 +1,10 @@
 # Offline recovery for the filter experiment
 
-Status: native build, private-hive tests and disposable Windows/WinPE recovery
-passed on 2026-09-06 UTC. No filter is installed on the working physical PC.
-This is developer recovery tooling, not approval to hide ordinary sign-in options.
+This document records the original recovery experiment and the tool's exact
+registry scope. Native tests and disposable Windows/WinPE recovery passed on
+2026-09-06 UTC. The later [desktop filter](DESKTOP_KEY_REQUIRED.md) has also passed
+physical two-key unlock; [USB recovery](USB_RECOVERY.md) records the paired
+recovery workflow. Start with [recovery guidance](RECOVERY.md) for an installed PC.
 
 ## What recovery removes
 

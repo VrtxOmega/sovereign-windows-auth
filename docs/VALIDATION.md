@@ -1,6 +1,45 @@
 # Validation record
 
-## Confirmed on 2026-09-05
+This is the current evidence summary, followed by the earlier development
+records. All dates below are UTC. A result applies to the stated configuration,
+not every Windows build or key model.
+
+## Current status
+
+| Area | Confirmed result | Boundary |
+| --- | --- | --- |
+| Default provider, physical PC | Both keys independently unlocked Windows, worked offline, resumed from sleep and signed in after separate restarts | One Windows 11 Pro x64 build 26200 PC; personal Microsoft account |
+| Desktop restriction, physical PC | Both keys unlocked with ordinary PIN/password choices absent | Lock/unlock only; the restart/offline/sleep results above predate the filter |
+| Final filter and PIN bridge, VM | Actual sign-in reached the desktop with identified alternatives hidden | Generated local-account PIN; no physical key |
+| Missing Sovereign DLL, VM | Final filter kept identified alternatives hidden; no ordinary sign-in tile | Deliberately missing provider; not a damaged filter DLL |
+| Paired recovery, VM | Missing USB refused; correct USB restored stock PIN sign-in and reached the desktop | Recovery media removed before Windows sign-in |
+| Paired recovery, physical PC | USB boot, storage discovery, pairing check and return to Windows passed | Read-only check; physical removal of an active filter remains untested |
+| Automation | Six default suites; ten with both optional build switches | Native/fixture checks, not hardware or real LogonUI proof |
+
+Implementation revision `bb50e8c` passed
+[GitHub Windows CI](https://github.com/VrtxOmega/sovereign-windows-auth/actions/runs/34012695678).
+The physical validation record at `51b29e3` also passed
+[CI](https://github.com/VrtxOmega/sovereign-windows-auth/actions/runs/34012829044).
+The optional components are built in CI but never registered.
+
+Detailed results and artifact hashes:
+[desktop restriction](DESKTOP_KEY_REQUIRED.md),
+[PIN bridge VM](PIN_BRIDGE_VM.md), [paired USB recovery](USB_RECOVERY.md).
+
+### Remaining validation
+
+- Physical restart, offline use and sleep/resume with the new filter active.
+- Missing/unrelated physical key rejection under the restriction.
+- Physical offline restoration of an active filter.
+- Full shutdown/power-on, hibernation and offline first sign-in after restart.
+- Fresh installation and recovery on another PC; Windows update compatibility.
+- Encrypted-volume recovery and independent security review.
+
+These are open checks, not known failures. Use the
+[compatibility report form](https://github.com/VrtxOmega/sovereign-windows-auth/issues/new?template=compatibility.yml)
+to contribute results, recording whether fallback was used.
+
+## Initial provider validation — 2026-09-05
 
 Test environment: Windows 11 Pro x64 build 26200; personal Microsoft account;
 existing numerical Windows Hello PIN; two independently enrolled physical
@@ -63,7 +102,7 @@ invalidation for actual deselection. The host reproduces the observed refresh
 order, and a separate real-key negative test checks cancellation of a completed
 proof. Actual desktop unlock then passed with each key.
 
-## Filter and recovery experiment, 2026-09-06 UTC
+## Original filter and recovery experiment — 2026-09-06
 
 The separate `swa_filter_lab` experiment subsequently passed its native contract
 suite alongside all three existing suites. It covers passive modes, missing
@@ -88,14 +127,17 @@ the ordinary password tile returned and sign-in reached the desktop. A replay
 from the saved broken state returned exit code zero and confirmed preservation
 of the stock PIN/password, Sovereign provider and filter COM registrations.
 
-These are real VM recovery results. They do not establish hidden-PIN compatibility
-with the real key bridge, encrypted-volume recovery or physical-PC activation.
+These original VM results did not establish hidden-PIN compatibility with the
+real key bridge or physical-PC activation. The later bridge and desktop-filter
+tests in the current summary supply that additional evidence. Encrypted-volume
+recovery remains unverified.
 No physical key or enrollment was attached to the VM. Details, the initial lab
 reporting defect and the recovery artifact hash are recorded in
 [offline filter recovery](FILTER_RECOVERY.md).
 
-## Next manual checks
+## Original provider checklist
 
+This checklist concerns the default provider without the desktop filter.
 Record each result with build number, source revision, key model/firmware and
 whether PIN/face fallback was used. Keep a tested recovery route available.
 

@@ -1,131 +1,93 @@
-# Requiring a key for desktop sign-in
+# Key-required sign-in: design record
 
-Status: the isolated and QEMU-only experiments are now joined by a separate
-[opt-in desktop filter](DESKTOP_KEY_REQUIRED.md) with explicit activation tooling.
-The VM DLL still cannot be enabled on the physical PC through configuration.
-The ordinary Windows PIN remains available unless the separate desktop filter
-is deliberately activated. Recovery uses the paired USB, not a recovery code.
+The optional [desktop restriction](DESKTOP_KEY_REQUIRED.md) is implemented and
+has passed two-key physical lock/unlock on the test PC. This record explains the
+decisions behind it. See [validation](VALIDATION.md) for the current evidence
+and [recovery](RECOVERY.md) for operating instructions.
 
-## Intended behavior
+## Preserve the Windows credential
 
-An ordinary PIN tile allows someone who knows the PIN to sign in without a key.
-The next mode should require either enrolled YubiKey for routine local desktop
-sign-in and unlock. Exceptional recovery should require a deliberate, separately
-authenticated procedure rather than another everyday sign-in option.
+Sovereign's working provider decrypts an enrolled Windows Hello PIN after key
+verification and supplies it to the stock PIN provider. Removing the PIN or its
+provider's COM registration would break that bridge.
 
-Do not delete the Windows Hello PIN. Sovereign decrypts the enrolled PIN after
-key verification and supplies it to the stock PIN provider. Removing or changing
-that credential breaks the bridge. Restricting its visible tile is a separate step.
+The separate filter controls whether identified ordinary tiles are offered in
+local LogonUI. It does not delete the underlying credential.
 
-## Candidate implementation
+## Separate the experiments from the desktop filter
 
-### Isolated experiment
+| Component | Purpose | Missing Sovereign provider |
+| --- | --- | --- |
+| `swa_filter_lab` | Simulated provider decisions in an ordinary process | Preserves ordinary alternatives when preconditions fail |
+| `SovereignCredentialFilterVm` | QEMU-only recovery experiment | Preserves alternatives when Sovereign is absent from the provider array |
+| `SovereignCredentialFilter` | Explicitly activated local desktop restriction | Continues excluding identified alternatives in mode 2 |
 
-Build with `tools/build.ps1`, then run:
+The old VM filter's absent-provider guard was useful while exploring Windows'
+behavior. It is not the policy of the active desktop filter. A present but
+unusable provider can still leave no tile; independent recovery is required in
+either case.
 
-```powershell
-./build/Release/swa_filter_lab.exe --self-test
-./build/Release/swa_filter_lab.exe --inspect
-```
+## Activation decisions
 
-The lab implements `ICredentialProviderFilter` inside an ordinary executable.
-Tests exercise simulated provider arrays; they do not invoke LogonUI or alter
-registration. The read-only inventory prints registered provider identifiers and
-identifies six convenience providers: current/legacy PIN, password, face,
-fingerprint and picture password. It does not inspect account or key profiles.
-Registration does not prove that a provider currently offers a usable tile.
+- Keep filtering off in the default provider installation.
+- Require reviewed provider and account coverage before enabling a machine-wide
+  desktop restriction.
+- Validate the working provider, filter and recovery artifact hashes.
+- Check that the protected PIN profile contains at least two enrolled keys.
+- Verify the paired removable recovery credential before registering the filter.
+- Stage the filter separately and register it as the final activation step.
+- Preserve stock providers, existing PIN enrollment and other filters' exclusions.
+- Refuse blind replacement of an existing filter configuration.
 
-Disabled, diagnostic, invalid and unsupported cases preserve all decisions.
-Simulated restriction requires explicit recovery, account-scope and inventory
-preconditions, plus an available Sovereign entry. These booleans are test inputs,
-not evidence validators or a deployable activation mechanism. Recognized
-convenience entries are excluded only for local logon/unlock with zero flags.
-Unknown providers and exclusions made by other filters remain unchanged. Remote
-credential handling returns `E_NOTIMPL` without forwarding credentials.
+The activation script permits explicitly reviewed hidden, nonadministrator
+background accounts without changing their rights. It does not establish
+general multi-user enrollment support.
 
-Local native compilation with warnings treated as errors and all ten automated
-suites passed on Windows build 26200, including the optional VM DLL and offline
-recovery fixture. This establishes interface/decision behavior
-in the lab. A separate [actual LogonUI bridge test](PIN_BRIDGE_VM.md) passed
-first sign-in, wrong-PIN refusal, and subsequent unlock with the standard tiles
-hidden in disposable Windows. An inventory on the physical machine also
-found unreviewed provider registrations; the experiment cannot claim complete
-key-only enforcement. The installed runtime hash remains unchanged.
+Mode 0 is passive; mode 1 observes decisions; mode 2 excludes identified ordinary
+alternatives for local logon/unlock. Invalid configuration and unsupported
+scenarios preserve decisions. Configuration is restricted to SYSTEM and
+administrators, who remain trusted.
 
-The [offline recovery experiment](FILTER_RECOVERY.md) removes only the filter's
-registration from an offline Windows hive. This passed in a disposable Windows
-machine after a loadable but unusable provider left no sign-in tile: WinPE recovery
-restored ordinary password sign-in while preserving the other registrations.
-The [paired USB extension](USB_RECOVERY.md) additionally passed missing/wrong USB
-refusal, removal of the USB after verification, and recovery to an existing PIN
-that reached the desktop. Physical boot from the paired Corsair also passed its
-read-only Windows discovery and credential check. Restoring an active restriction
-on the physical laptop and physical hidden-PIN validation are still pending.
+## Independent recovery
 
-### Desktop implementation and physical validation
+Two keys cover losing one key. They do not repair a broken DLL, stale PIN,
+damaged profile or a changed Windows callback interface.
 
-A separately registered `ICredentialProviderFilter` can control which known
-providers LogonUI enumerates for `CPUS_LOGON` and `CPUS_UNLOCK_WORKSTATION`.
-The disposable-VM experiment established that hiding the stock PIN tile still
-allows the production bridge to construct and use its provider internally on
-Windows build 26200. The fixture used a generated local-account PIN directly;
-the physical Microsoft-account and YubiKey path still needs a bounded trial.
-The separate desktop filter repeats that compatibility result and excludes known
-alternatives even when the Sovereign DLL is missing. Its activation script
-validates hashes, existing two-key PIN enrollment, paired recovery authorization,
-and reviewed provider/account scope before registering the filter last.
-Do not remove the stock provider's COM registration or alter PIN enrollment.
-Default installation must leave filtering off. A diagnostic mode should report
-decisions without changing them or collecting account secrets.
+The paired recovery screen runs outside the affected LogonUI process. It checks
+the USB credential again immediately before restoring normal sign-in and removes
+only the filter registration. It preserves the PIN and Sovereign enrollment.
+A missing key or failed touch must not silently enable ordinary PIN sign-in.
 
-Microsoft prohibits excluding unknown provider identifiers and filtering generic
-Credential UI prompts. Therefore activation needs an inventory of actual providers
-and alternative account access, and cannot promise coverage of future providers.
-The filter interface is scenario-based, not a per-account enrollment callback;
-a single-user experiment must not be represented as safe for unenrolled users.
-[Microsoft's filter contract](https://learn.microsoft.com/en-us/windows/win32/api/credentialprovider/nf-credentialprovider-icredentialproviderfilter-filter).
+Recovery has reached the desktop in disposable Windows after a deliberately
+unavailable provider. The physical recovery USB has passed boot, storage
+discovery, pairing verification and return to Windows. Actual filter removal on
+the physical laptop and encrypted-volume recovery remain separate unverified
+cases.
 
-## Recovery before activation
+## Evidence so far
 
-Two keys cover loss of one key. They do not cover a broken DLL, stale enrolled PIN,
-damaged profile, or Windows update that changes the bridge's private interfaces.
-The current uninstall script requires an accessible administrator desktop and is
-not sufficient alone once ordinary sign-in choices are hidden.
+- Native provider/filter contracts and recovery fixtures pass in the ten-suite CI.
+- The shared production PIN bridge completed actual VM sign-in and unlock with
+  the ordinary tiles hidden; a wrong generated lab PIN was rejected.
+- The final desktop filter kept identified alternatives hidden when Sovereign's
+  DLL was deliberately missing.
+- The paired USB removed that final filter registration and the existing lab PIN
+  reached the desktop after recovery media was removed.
+- Both physical YubiKeys unlocked the enrolled personal Microsoft-account PC
+  with ordinary PIN/password options absent.
 
-Implement and rehearse recovery outside the affected LogonUI process on disposable
-Windows first. It must remove only this filter's exact registration and restore
-native sign-in choices while preserving enrollment and other providers. Keep any
-system-volume encryption active and its recovery material separately accessible.
-An already unlocked administrator session is not the only required recovery test.
-
-A possible additional route is a high-entropy recovery code held separately from
-the PC, with only its verifier stored locally. This needs its own attempt limits,
-replay prevention, expiration and state-integrity design. A visible “use PIN”
-button, a missing key or a key timeout must not silently enable recovery. Such a
-code also cannot repair a filter that fails to load and cannot replace independent
-recovery.
-
-Microsoft recommends retaining a system provider when no other recovery route
-exists and notes compatibility risks when wrapping stock providers. The recovery
-experiment must address those exact failure modes.
-[Credential providers and recovery](https://learn.microsoft.com/en-us/windows/win32/secauthn/credential-providers-in-windows).
-
-## Required evidence
-
-1. Isolated-host tests: known and unknown providers, supported and unsupported
-   scenarios, absent or invalid configuration, diagnostics and independent removal.
-2. Disposable Windows: hidden PIN tile with a working internal bridge; missing and
-   wrong keys; timeout, cancellation, and ordinary alternative sign-in attempts.
-3. Recovery with an unavailable Sovereign DLL and stale enrollment, restoring
-   ordinary sign-in without needing a functioning Sovereign provider.
-4. Both keys independently: lock, offline use, sleep, restart and first sign-in.
-5. A bounded laptop trial only after recovery is proven, keeping the working
-   runtime and enrollment intact.
+Detailed records: [desktop filter](DESKTOP_KEY_REQUIRED.md),
+[PIN bridge VM](PIN_BRIDGE_VM.md), [USB recovery](USB_RECOVERY.md).
 
 ## Scope
 
-This concerns local interactive sign-in. Hiding tiles does not revoke passwords,
-remove network logon rights, protect an unlocked session, require a key for UAC,
-or unlock an encrypted disk before Windows boots. Each needs separate enforcement
-and tests. Administrators and SYSTEM remain trusted under the existing
-[security model](SECURITY_MODEL.md).
+Microsoft's [filter contract](https://learn.microsoft.com/en-us/windows/win32/api/credentialprovider/nf-credentialprovider-icredentialproviderfilter-filter)
+requires preserving unknown provider identifiers and generic credential prompts.
+Review provider coverage again after installing authentication software or
+changing account configuration.
+
+The restriction does not revoke passwords, remove network logon rights, protect
+an already unlocked session, require a key for UAC, or unlock an encrypted disk.
+A missing/damaged filter DLL can prevent its policy from running. Offline disk
+protection, application authentication and boot policy require separate designs.
+See [the security model](SECURITY_MODEL.md).

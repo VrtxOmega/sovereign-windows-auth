@@ -11,9 +11,15 @@ Touch proves physical presence. Anyone with an enrolled key and access to this
 PC can touch it. This is deliberately a possession-based alternative to entering
 the PIN; it is not two-factor sign-in. Keep the recovery key separately.
 
-The ordinary PIN option can still sign in without a YubiKey. A proposed
-[key-required mode and recovery design](KEY_REQUIRED_DESIGN.md) describes the next
-step; it is not implemented or enabled in this release.
+The default installation keeps ordinary PIN sign-in available. The optional
+[desktop restriction](DESKTOP_KEY_REQUIRED.md) hides identified ordinary
+sign-in providers while preserving the PIN bridge. Both physical keys have
+passed lock/unlock with that restriction on the tested PC. It is not enabled by
+building the project or by the default provider installer.
+
+The restriction applies to local sign-in tiles, not every Windows authentication
+path. Unknown providers and remote/generic credential scenarios remain outside
+its scope. Review provider and account coverage before activation.
 
 ## Trust boundaries
 
@@ -72,9 +78,17 @@ this whole project a FIPS-validated solution.
 
 Changing the Windows PIN makes the existing encrypted enrollment stale. Safe PIN
 rotation and individual-key revocation are not implemented yet. If a key is lost,
-disable Sovereign using the recovery script, then use native Windows sign-in.
+restore ordinary sign-in first if the desktop filter is active, then unregister
+Sovereign and use native Windows sign-in. Follow [recovery](RECOVERY.md) in that
+order; unregistering the provider alone does not remove the filter.
 Do not rely on changing the Microsoft browser passkey to revoke this separate
 credential. Unregistering Sovereign does not erase its protected profile.
+
+The paired USB stores a random bearer credential; Windows holds its protected
+verifier. This authorizes the recovery tool to remove the separate filter
+registration. The file can be copied, and an unencrypted Windows volume remains
+editable from another boot environment. Pairing is not hardware anti-cloning,
+disk encryption or exclusive protection against offline bypass.
 
 No independent security audit or broad deployment validation has been completed.
 The public source release is intended to make those reviews and tests possible.

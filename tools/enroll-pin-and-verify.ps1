@@ -45,6 +45,6 @@ try {
 } catch {
     Write-TaskState 'stopped' $_.Exception.Message
     Write-Host $_.Exception.Message
-    Write-Host 'Codex will inspect the result. Your existing Windows sign-in is still available.'
+    Write-Host 'Keep the enrollment state and review the error before retrying. Windows sign-in settings were not changed by this helper.'
 }
 Read-Host 'Press Enter to close this helper'

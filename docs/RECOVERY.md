@@ -1,42 +1,90 @@
 # Recovery
 
-The instructions below cover the installed credential provider, which keeps
-native PIN recovery available. The separate, optional filter experiment has
-[offline recovery tooling](FILTER_RECOVERY.md); it is not installed by the normal
-provider installer and must not be activated on a physical PC on the strength
-of private-hive tests alone.
+Use the route that matches your installation. Recovery restores access through
+your existing Windows credential; it does not reveal, reset or bypass your PIN.
 
-Before installation, confirm that you can unlock this account using the ordinary
-Windows PIN option. Keep that option available while testing Sovereign. If
-Sovereign fails, choose **Sign-in options → PIN** and use your existing Windows PIN.
+| Installed setup | Recovery route |
+| --- | --- |
+| Default Sovereign provider | Select **Sign-in options → PIN** |
+| Provider with desktop restriction | Boot the paired USB, restore PIN sign-in, then enter your existing PIN |
 
-From an administrator PowerShell window on the desktop, unregister Sovereign:
+**If the desktop filter is active, restore ordinary sign-in before unregistering
+Sovereign.** Unregistering the provider alone leaves the filter installed and can
+leave no usable sign-in tile.
+
+## With the default installation
+
+The default installer preserves ordinary Windows sign-in. If Sovereign fails,
+choose **Sign-in options → PIN** and use the numerical PIN you already use on
+this PC. Before first installation, confirm that this route works.
+
+Once on the desktop, you can [unregister Sovereign](#unregister-the-provider).
+Keep existing enrollment files for diagnosis.
+
+## With the desktop restriction
+
+Keep the paired recovery USB separately and boot-test it before enabling the
+restriction. Use your PC's boot menu to start its recovery image; boot-menu keys
+vary by manufacturer.
+
+1. Select the intended Windows installation if the screen lists more than one.
+   Drive letters may differ from those in your normal Windows session.
+2. Select **Check recovery USB**.
+3. Keep the paired USB connected. Select **Restore PIN sign-in** and confirm.
+4. Select **Restart**, remove the USB and sign in using your existing Windows PIN.
+
+The tool checks USB authorization again before changing the offline registry,
+keeps a protected backup and removes only Sovereign's filter registration. The
+PIN, encrypted key enrollments and credential-provider registrations remain
+intact. A missing or mismatched USB does not authorize restoration.
+
+After recovery, diagnose the original failure before reactivating the filter.
+The activation script refuses an existing configuration rather than blindly
+overwriting it. [USB preparation and validation](USB_RECOVERY.md) ·
+[Exact offline scope](FILTER_RECOVERY.md)
+
+## Unregister the provider
+
+First restore ordinary sign-in if the desktop restriction was enabled. The
+unregister helper removes the provider, not the separate filter.
+
+From an administrator PowerShell window on the desktop:
 
 ```powershell
 & "$env:ProgramFiles\SovereignWindowsAuth\unregister-provider.ps1"
 ```
 
 Alternatively, run `Recover-Windows-Signin.cmd` in that installed directory as
-administrator. If script policy blocks the command, use a process-only exception:
+administrator. If script policy blocks execution, use a process-only exception:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$env:ProgramFiles\SovereignWindowsAuth\unregister-provider.ps1"
 ```
 
-The script removes only Sovereign's credential-provider and COM registration. It
-keeps the encrypted enrollment and installed files for diagnosis and requests no
-restart. If a historical update saved sign-in preferences, the companion restore
-script restores a value only when it still equals Sovereign's applied value.
-Fresh installation does not disable the native PIN or face providers.
+The script removes only Sovereign's credential-provider and COM registration.
+It keeps encrypted enrollments and installed files, and requests no restart.
+If a historical update saved sign-in preferences, the companion restore script
+restores a value only when it still equals Sovereign's applied value.
 
-Changing your Windows PIN leaves the encrypted enrollment stale. If this happens,
-use native Windows sign-in and unregister Sovereign. Enrollment deliberately
-refuses to overwrite an existing profile; a safe PIN-update/revocation workflow
-is still pending. Do not delete or replace profile files as a troubleshooting guess.
+## Changed PIN or lost key
 
-If you cannot reach the desktop through any normal provider, stop testing and use
-your established Windows recovery procedure. Do not disable Secure Boot, LSA
-protection or Windows signing checks. This project has not validated an offline
-registry-repair procedure and does not promise recovery from arbitrary system
-damage. Keep disk-encryption recovery material available through your normal
-device-management process before conducting cold-boot tests.
+Changing the Windows PIN leaves its encrypted enrollment stale. Use the recovery
+route above and unregister Sovereign. Safe PIN updates and individual-key
+revocation are [planned work](ROADMAP.md); do not delete or replace profile files
+as a troubleshooting guess.
+
+A browser passkey is separate from Sovereign's enrollment. Removing that browser
+passkey does not revoke the key's ability to use Sovereign.
+
+## Limits
+
+Recovery of the exact active filter has passed in disposable Windows, including
+a deliberately missing Sovereign DLL. The paired USB has also booted on the
+physical test laptop and verified its offline installation. Actual removal of
+an active filter on that physical laptop is not yet recorded.
+
+The tool cannot repair arbitrary Windows damage or unlock BitLocker. Keep the
+device's existing encryption recovery route available. Do not disable Secure
+Boot, LSA protection or Windows signing checks to work around a failed test.
+
+For symptoms and reporting guidance, see [troubleshooting](TROUBLESHOOTING.md).

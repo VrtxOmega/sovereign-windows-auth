@@ -9,5 +9,5 @@ Write-Host 'Use the numerical Windows PIN in the Windows PIN check dialog.'
 $taskExit = $LASTEXITCODE
 @{phase='finished'; exitCode=$taskExit; time=(Get-Date).ToUniversalTime().ToString('o'); profileSaved=$false; providerRegistered=$false} | ConvertTo-Json | Set-Content -LiteralPath $taskState
 if ($taskExit -eq 0) { Write-Host 'Windows accepted the PIN test. No sign-in settings have been changed.' }
-else { Write-Host 'The test stopped. Codex will inspect the diagnostic result.' }
+else { Write-Host 'The test stopped. Review the local diagnostic result before retrying.' }
 Read-Host 'Press Enter to close this helper'

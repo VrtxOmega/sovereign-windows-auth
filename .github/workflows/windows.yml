@@ -15,6 +15,9 @@ jobs:
       - name: Check source and PowerShell syntax
         shell: pwsh
         run: ./tools/check-source.ps1
+      - name: Check documentation links
+        shell: pwsh
+        run: ./tools/check-docs.ps1
       - name: Fetch and verify pinned Yubico SDK
         shell: pwsh
         run: ./tools/fetch-dependencies.ps1

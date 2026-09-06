@@ -1,26 +1,66 @@
-# Contributing
+# Contributing to Sovereign Windows Auth
 
-Contributions are accepted under GPL-3.0-only. Preserve attribution and third-party
-notices. Explain the behavior being changed, how it was verified and which checks
-remain untested. Keep commits focused; never publish enrollment profiles, account
-identifiers, key serials, credentials, memory dumps or unreviewed logs.
+Contributions are welcome under GPL-3.0-only. Preserve copyright and third-party
+attribution. Start with the [architecture](docs/ARCHITECTURE.md),
+[security model](docs/SECURITY_MODEL.md) and [roadmap](docs/ROADMAP.md).
 
-Use `tools/build.ps1` for the native build and tests and
-`tools/check-source.ps1` for source checks. CI must never enroll a credential,
-register a sign-in provider, change system sign-in preferences or request a PIN.
+## Choose a contribution
 
-Authentication changes need review of cancellation, expiry, one-time consumption,
-account binding, error cleanup and the Windows callback lifecycle. Automated
-results alone do not establish real LogonUI behavior. Record manual results using
-the categories in [the validation record](docs/VALIDATION.md).
+- Report results from a new Windows/key configuration using the compatibility form.
+- Fix a reproducible build, enrollment, recovery or sign-in problem.
+- Improve setup, accessibility, diagnostics or documentation.
+- Review credential handling, the PIN bridge or recovery boundaries.
 
-Useful next contributions:
+Use [issues](https://github.com/VrtxOmega/sovereign-windows-auth/issues/new/choose)
+for non-sensitive work. Send vulnerabilities through [private reporting](SECURITY.md).
+For a substantial design change, describe the use case and recovery implications
+before developing a large patch.
 
-- Reboot/offline/sleep and additional-machine compatibility reports.
-- Safe PIN rotation, re-enrollment and individual-key revocation.
-- Review of the Windows PIN callback ABI and memory-handling boundaries.
-- A recoverable installer and signed releases with complete dependency notices.
-- Accessible enrollment UI and clear status/error text.
+## Development workflow
 
-Open a normal issue for reproducible non-sensitive failures. Use the private
-reporting route in [SECURITY.md](SECURITY.md) for vulnerabilities.
+1. Fork the repository and create a focused branch from `main`.
+2. Follow [setup prerequisites](docs/SETUP.md#prerequisites).
+3. Build and run the checks relevant to the change.
+4. Update documentation when behavior or validation changes.
+5. Open a pull request explaining the problem, resulting behavior and actual checks.
+
+The full local CI-equivalent build is:
+
+```powershell
+./tools/fetch-dependencies.ps1
+./tools/check-source.ps1
+./tools/check-docs.ps1
+./tools/build.ps1 -WithVmFilter -WithDesktopFilter
+```
+
+This compiles the native components and runs ten suites. It does not enroll keys,
+register providers/filters, request credentials or change Windows preferences.
+Keep those operations out of CI.
+
+For documentation-only work, run source and documentation checks. For native
+changes, run the full build. New or changed sign-in behavior also requires the
+appropriate disposable-VM and physical tests; a native test host does not prove
+actual LogonUI behavior.
+
+## Review expectations
+
+Keep commits focused. Authentication changes should address cancellation, expiry,
+single-use proof handling, account binding, cleanup and the Windows callback
+lifecycle. Filter changes should describe affected scenarios, other-account
+behavior and independent recovery. Setup changes should cover partial failure
+and preservation of existing enrollment.
+
+State what was not tested. Record Windows build, source revision and key
+model/firmware for hardware results; do not infer reboot or offline behavior from
+ordinary lock/unlock. Use the categories in [validation](docs/VALIDATION.md).
+
+## Keep private material out of contributions
+
+Never commit enrollment profiles, PINs, passwords, recovery credentials, account
+identifiers, key serials, memory dumps or unreviewed logs. The ignored
+`artifacts/` and `build/` directories are local working data, not publication
+inputs. Review every attachment and the staged diff before sending it.
+
+Historical update helpers remain for traceability, not as a general upgrade
+procedure. Use the documented setup entry points rather than replaying scripts
+from the original development machine.

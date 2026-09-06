@@ -48,7 +48,7 @@ All eight native suites passed, including the fixture's nonactivation and COM
 lifetime checks. Those checks load the DLL without registering it and verify
 that an unarmed host exposes no credentials or automatic sign-in.
 
-## What remains
+## Scope of this experiment
 
 This establishes compatibility between filtering the visible PIN tile and using
 its provider internally on the tested Windows build and local VM account. It does
@@ -56,8 +56,8 @@ not establish physical Microsoft-account compatibility, missing/wrong YubiKey
 behavior under a filter, coverage of other installed providers, or protection
 against offline changes to an unencrypted disk.
 
-The working physical provider and enrollments are unchanged. A physical key-only
-trial still needs a reviewed activation mechanism, account/provider inventory,
-and the [recovery requirements](KEY_REQUIRED_DESIGN.md). The paired Corsair has
-already passed physical boot and its read-only authorization check; actual
-removal of an active filter on the physical laptop remains untested.
+Subsequently, the separate [desktop filter](DESKTOP_KEY_REQUIRED.md) passed
+physical two-key lock/unlock after account/provider inventory and paired recovery
+checks. That later result supplies the physical evidence; this VM fixture itself
+does not. Actual removal of an active filter on the physical laptop remains
+untested. See the [current validation matrix](VALIDATION.md).

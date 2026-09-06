@@ -75,7 +75,7 @@ The tested desktop filter SHA-256 is
 `A50660B1AD9E2B344F7D9C843CA5B8E8BBA23318F941FCC147CD7F8BC64EE153`.
 The lab uses a generated local-account PIN; it is not a physical YubiKey test.
 See [the bridge experiment](PIN_BRIDGE_VM.md) for its earlier rejection/unlock
-tests. Physical activation and hardware results will be recorded separately.
+tests. Physical activation and hardware results are recorded below.
 
 With the Sovereign COM path deliberately pointing to a missing DLL, the final
 desktop filter received 12 entries without Sovereign, excluded five known

@@ -1,0 +1,46 @@
+name: Bug report
+description: Report a reproducible build, enrollment, sign-in or recovery failure.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For an authentication bypass or credential exposure, use private security reporting.
+        Do not include PINs, passwords, key serials, account identifiers, recovery credentials or raw logs.
+  - type: input
+    id: revision
+    attributes:
+      label: Source revision
+      description: Commit SHA or source tag.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Windows edition/build, key model/firmware if known, and compiler version for build problems.
+    validations:
+      required: true
+  - type: dropdown
+    id: configuration
+    attributes:
+      label: Sign-in setup
+      options:
+        - Build or enrollment only
+        - Default provider installation
+        - Optional desktop restriction
+        - Disposable VM experiment
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction and result
+      description: Steps, expected behavior, actual behavior and a redacted error code.
+    validations:
+      required: true
+  - type: textarea
+    id: recovery
+    attributes:
+      label: Recovery outcome
+      description: If sign-in was affected, did normal PIN sign-in or the paired USB restore access?

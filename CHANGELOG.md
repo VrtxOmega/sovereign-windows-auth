@@ -1,6 +1,17 @@
 # Changelog
 
-## Unreleased — recovery experiment
+## Unreleased
+
+### Desktop restriction and recovery
+
+- Add an opt-in local desktop filter that preserves the Windows PIN internally
+  while hiding identified ordinary sign-in alternatives.
+- Validate the existing provider, two-key enrollment, account/provider inventory
+  and paired recovery credential before registering the separate filter.
+- Confirm both physical YubiKeys unlock with ordinary PIN/password options absent.
+- Prove the shared PIN bridge in actual VM LogonUI, including wrong-PIN rejection.
+- Prove recovery after the final filter encounters a missing Sovereign DLL:
+  the paired USB restores the existing PIN screen and sign-in reaches the desktop.
 
 - Pair a removable recovery drive using a random credential and a protected
   local verifier; refuse silent replacement and malformed or mismatched keys.
@@ -9,7 +20,16 @@
 - Inspect a temporary registry copy before permitting changes to paired offline
   installations. Keep the exact, non-recursive filter removal and protected backup.
 - Build private bootable recovery media from a user-supplied Windows ISO.
-- Keep filtering disabled on physical hardware; pairing is not disk protection.
+- Keep filtering disabled in the default installation; pairing is not disk protection.
+- Expand native CI from three to ten suites with optional filter/bridge fixtures.
+
+### Repository and documentation
+
+- Add project artwork, build/license/status badges and a documentation index.
+- Add architecture, troubleshooting and roadmap guides.
+- Reconcile setup, recovery, security and validation with the tested desktop filter.
+- Add issue forms, a pull request template, formatting conventions and local
+  documentation-link checks.
 
 ## 0.1.0-alpha.1 — 2026-09-05
 

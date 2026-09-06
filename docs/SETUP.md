@@ -1,5 +1,7 @@
 # Developer setup
 
+[Documentation index](README.md) · [Recovery](RECOVERY.md) · [Troubleshooting](TROUBLESHOOTING.md)
+
 This source release has been validated on one Windows 11 Pro x64 PC with two
 YubiKeys. It does not yet provide a signed end-user installer. Begin on a machine
 where you can recover through the ordinary Windows PIN option, and read the
@@ -12,7 +14,7 @@ where you can recover through the ordinary Windows PIN option, and read the
   numerical Windows Hello PIN. Current enrollment requires this account type.
 - Two USB YubiKeys supporting FIDO2 `hmac-secret`. Runtime selection currently
   filters for Yubico devices. Other vendors and key models are not validated.
-- Visual Studio 2022 C++ Build Tools with MSVC v143, CMake and a Windows SDK.
+- Visual Studio 2022 C++ Build Tools with MSVC v143, CMake 3.24 or later and a Windows SDK.
   SDK 26100 was used for the desktop-tested build.
 - Python 3.11 or later and Git, available from the command line.
 
@@ -23,10 +25,13 @@ issue, chat, transcript or recording.
 
 ## Build without changing sign-in
 
-From the repository root:
+Clone the repository, then build from its root in PowerShell:
 
 ```powershell
+git clone https://github.com/VrtxOmega/sovereign-windows-auth.git
+cd sovereign-windows-auth
 ./tools/fetch-dependencies.ps1
+./tools/check-source.ps1
 ./tools/build.ps1
 ./tools/setup-python.ps1
 ```
@@ -41,8 +46,17 @@ Set-ExecutionPolicy -Scope Process Bypass
 
 The SDK script verifies a pinned archive hash and four Yubico-signed runtime DLLs.
 The build finds CMake through PATH or Visual Studio's installer inventory and runs
-three automated tests. No enrollment, registration or Windows preference changes
+six native test suites. No enrollment, registration or Windows preference changes
 are made by those build commands. Build outputs are in `build/Release`.
+
+For the full ten-suite CI configuration, build with both optional components:
+
+```powershell
+./tools/build.ps1 -WithVmFilter -WithDesktopFilter
+```
+
+These switches compile the desktop filter and VM fixtures; they do not register
+or activate them. Never register a VM fixture on an ordinary PC.
 
 ## Create the two independent hardware credentials
 
@@ -108,3 +122,15 @@ and `update-provider-refresh.ps1` are historical development helpers with
 prerequisites from the original machine's staged updates. They are not a fresh
 installation or general upgrade procedure. The current source already includes
 the display and refresh fixes; do not replay those updates.
+
+## Optional desktop restriction
+
+After the default provider works with both keys, the separate
+[desktop restriction guide](DESKTOP_KEY_REQUIRED.md) covers hiding ordinary
+sign-in choices. First prepare and physically boot-test the
+[paired USB recovery screen](USB_RECOVERY.md). Activation requires reviewed
+account/provider coverage and hashes for the tested artifacts.
+
+This is a bounded developer procedure, not part of the default installation.
+Do not remove the underlying PIN enrollment or the stock PIN provider's COM
+registration; Sovereign continues to use them internally.

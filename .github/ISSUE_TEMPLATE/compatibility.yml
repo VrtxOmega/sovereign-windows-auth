@@ -1,0 +1,42 @@
+name: Compatibility report
+description: Record a hardware or Windows configuration you actually tested.
+title: "[Compatibility]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Successful and failed tests are both useful. Report only checks you performed.
+        Omit account identifiers, key serials, enrollment files and recovery credentials.
+  - type: textarea
+    id: environment
+    attributes:
+      label: Tested configuration
+      description: Source revision, Windows edition/build, account type and key models/firmware.
+    validations:
+      required: true
+  - type: dropdown
+    id: configuration
+    attributes:
+      label: Sign-in setup
+      options:
+        - Default provider installation
+        - Optional desktop restriction
+        - Disposable VM experiment
+    validations:
+      required: true
+  - type: textarea
+    id: results
+    attributes:
+      label: Results
+      description: Mark each case passed, failed or not tested. State whether a PIN/password/face fallback was used.
+      value: |
+        - Fresh enrollment and installation:
+        - First key unlock:
+        - Second key unlock:
+        - Offline unlock:
+        - Sleep/resume:
+        - First sign-in after restart:
+        - Missing or unrelated key:
+        - Recovery:
+    validations:
+      required: true
