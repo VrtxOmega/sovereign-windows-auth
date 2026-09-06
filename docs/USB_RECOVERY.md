@@ -143,7 +143,8 @@ changing the offline Windows installation. This confirms physical boot, storage
 discovery and USB authorization. Drive letters in recovery can differ from those
 in the installed Windows session.
 
-The photograph establishes the read-only check, not restoration of an active
-filter on the physical laptop. Return to normal Windows after this check has not
-yet been reported. Physical restoration with a restriction installed,
-encrypted-volume recovery and hidden-PIN bridge validation remain pending.
+The user subsequently confirmed returning to normal Windows after this check.
+The photograph and confirmation establish the read-only recovery boot and return,
+not restoration of an active filter on the physical laptop. Physical restoration
+with a restriction installed, encrypted-volume recovery and hidden-PIN bridge
+validation remain pending.
