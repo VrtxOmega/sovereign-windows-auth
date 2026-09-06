@@ -20,4 +20,4 @@ jobs:
         run: ./tools/fetch-dependencies.ps1
       - name: Build and run native tests
         shell: pwsh
-        run: ./tools/build.ps1 -WithVmFilter
+        run: ./tools/build.ps1 -WithVmFilter -WithDesktopFilter

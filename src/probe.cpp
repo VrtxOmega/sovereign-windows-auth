@@ -180,6 +180,14 @@ void makeFixture(const wchar_t* first,const wchar_t* second,const wchar_t* outpu
 }
 int wmain(int argc, wchar_t** argv) {
     try {
+        if (argc==2 && std::wstring_view(argv[1])==L"--profile-check") {
+            // Read only. The inner credential remains encrypted by the key.
+            const auto profile=swa::loadProfile(swa::currentSid());
+            const bool pin=profile.kind==swa::CredentialKind::WindowsPin;
+            std::cout << "{\"windowsPin\":" << (pin?"true":"false")
+                << ",\"enrolledKeys\":" << (profile.additional.size()+1) << "}\n";
+            return pin && !profile.additional.empty() ? 0 : 2;
+        }
         if (argc==2 && std::wstring_view(argv[1])==L"--self-test") {
             selfTest();
             return 0;

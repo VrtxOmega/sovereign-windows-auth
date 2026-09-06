@@ -5,7 +5,9 @@
 Sovereign adds a native **Sovereign key** option to the Windows sign-in screen.
 Either enrolled key can unlock the same account independently. Daily use is:
 select **Sign in**, touch the key, and enter your desktop. Your ordinary Windows
-PIN remains available for recovery.
+PIN remains available in the default installation. The separate experimental
+[desktop restriction](docs/DESKTOP_KEY_REQUIRED.md) can hide ordinary sign-in
+choices after paired USB recovery is prepared and tested.
 
 **Experimental, with actual desktop unlock verified on Windows 11 Pro x64 build
 26200 using two physical YubiKeys.** This is a source release for developers and
@@ -63,8 +65,8 @@ preserved by the `prototype-2026-09-05` Git tag.
 Six native automated suites cover cryptography/profile parsing, the credential
 provider contract, Windows credential serialization, an isolated filter experiment,
 offline recovery against a private registry hive, and recovery USB credentials.
-An optional seventh suite
-checks the QEMU-only filter DLL. The [key-required design](docs/KEY_REQUIRED_DESIGN.md)
+Four optional suites check the QEMU filter, VM PIN bridge guard, and desktop
+filter policy/COM behavior, bringing CI to ten suites. The [key-required design](docs/KEY_REQUIRED_DESIGN.md)
 explains these experiments and their remaining recovery requirements. CI builds and runs the suites
 without enrolling hardware or registering a sign-in provider. Hardware and real
 lock-screen tests remain manual.

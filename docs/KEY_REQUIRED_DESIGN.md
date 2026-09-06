@@ -1,10 +1,10 @@
 # Requiring a key for desktop sign-in
 
-Status: isolated filter and recovery experiments. The ordinary test executable is
-joined by an optional QEMU-only filter DLL and an offline recovery executable.
-No filter is installed on the working physical PC, and the VM DLL cannot be
-enabled there through configuration. Recovery codes are not implemented. The
-ordinary Windows PIN remains available in the current release.
+Status: the isolated and QEMU-only experiments are now joined by a separate
+[opt-in desktop filter](DESKTOP_KEY_REQUIRED.md) with explicit activation tooling.
+The VM DLL still cannot be enabled on the physical PC through configuration.
+The ordinary Windows PIN remains available unless the separate desktop filter
+is deliberately activated. Recovery uses the paired USB, not a recovery code.
 
 ## Intended behavior
 
@@ -43,7 +43,7 @@ convenience entries are excluded only for local logon/unlock with zero flags.
 Unknown providers and exclusions made by other filters remain unchanged. Remote
 credential handling returns `E_NOTIMPL` without forwarding credentials.
 
-Local native compilation with warnings treated as errors and all eight automated
+Local native compilation with warnings treated as errors and all ten automated
 suites passed on Windows build 26200, including the optional VM DLL and offline
 recovery fixture. This establishes interface/decision behavior
 in the lab. A separate [actual LogonUI bridge test](PIN_BRIDGE_VM.md) passed
@@ -62,7 +62,7 @@ that reached the desktop. Physical boot from the paired Corsair also passed its
 read-only Windows discovery and credential check. Restoring an active restriction
 on the physical laptop and physical hidden-PIN validation are still pending.
 
-### Physical implementation still pending
+### Desktop implementation and physical validation
 
 A separately registered `ICredentialProviderFilter` can control which known
 providers LogonUI enumerates for `CPUS_LOGON` and `CPUS_UNLOCK_WORKSTATION`.
@@ -70,6 +70,10 @@ The disposable-VM experiment established that hiding the stock PIN tile still
 allows the production bridge to construct and use its provider internally on
 Windows build 26200. The fixture used a generated local-account PIN directly;
 the physical Microsoft-account and YubiKey path still needs a bounded trial.
+The separate desktop filter repeats that compatibility result and excludes known
+alternatives even when the Sovereign DLL is missing. Its activation script
+validates hashes, existing two-key PIN enrollment, paired recovery authorization,
+and reviewed provider/account scope before registering the filter last.
 Do not remove the stock provider's COM registration or alter PIN enrollment.
 Default installation must leave filtering off. A diagnostic mode should report
 decisions without changing them or collecting account secrets.
