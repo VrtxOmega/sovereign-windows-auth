@@ -40,3 +40,11 @@ target_link_options(swa_windows_auth_test PRIVATE /guard:cf /DYNAMICBASE /NXCOMP
 add_test(NAME windows_online_identity_format COMMAND swa_windows_auth_test)
 add_test(NAME crypto_and_parser COMMAND swa_probe --self-test)
 add_test(NAME credential_provider_contract COMMAND swa_provider_host "$<TARGET_FILE:SovereignCredentialProvider>")
+
+# The filter experiment is an executable only: no registration or live DLL path.
+add_executable(swa_filter_lab src/filter_lab.cpp)
+target_compile_definitions(swa_filter_lab PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX)
+target_compile_options(swa_filter_lab PRIVATE /W4 /WX /sdl /guard:cf /EHsc)
+target_link_libraries(swa_filter_lab PRIVATE ole32 advapi32)
+target_link_options(swa_filter_lab PRIVATE /guard:cf /DYNAMICBASE /NXCOMPAT /CETCOMPAT)
+add_test(NAME credential_filter_lab_contract COMMAND swa_filter_lab --self-test)

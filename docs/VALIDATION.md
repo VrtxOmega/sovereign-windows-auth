@@ -65,6 +65,14 @@ proof. Actual desktop unlock then passed with each key.
 
 ## Next manual checks
 
+The separate `swa_filter_lab` experiment subsequently passed its native contract
+suite alongside all three existing suites. It covers passive modes, missing
+preconditions, unsupported scenarios/flags, known/unknown providers, existing
+exclusions, absent/unavailable Sovereign, invalid input, COM identity and remote
+credential rejection. This process never registers a filter or changes sign-in.
+These results do not establish actual LogonUI restriction or independent recovery;
+see the [key-required design](KEY_REQUIRED_DESIGN.md).
+
 Record each result with build number, source revision, key model/firmware and
 whether PIN/face fallback was used. Keep a tested recovery route available.
 

@@ -60,8 +60,10 @@ The [validation record](docs/VALIDATION.md) distinguishes actual hardware and
 lock-screen results from automated checks. The initial working implementation is
 preserved by the `prototype-2026-09-05` Git tag.
 
-Three native automated suites cover cryptography/profile parsing, the credential
-provider contract and Windows credential serialization. CI builds and runs them
+Four native automated suites cover cryptography/profile parsing, the credential
+provider contract, Windows credential serialization and an isolated filter
+experiment. The [key-required design](docs/KEY_REQUIRED_DESIGN.md) explains that
+experiment and its remaining recovery requirements. CI builds and runs the suites
 without enrolling hardware or registering a sign-in provider. Hardware and real
 lock-screen tests remain manual.
 

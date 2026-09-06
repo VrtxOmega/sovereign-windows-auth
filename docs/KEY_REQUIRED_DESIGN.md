@@ -1,7 +1,9 @@
 # Requiring a key for desktop sign-in
 
-Status: design only. Provider filtering and recovery codes are not implemented or
-installed. The ordinary Windows PIN remains available in the current release.
+Status: isolated filter experiment. The filter interface and its decision tests
+exist only in `swa_filter_lab.exe`. There is no filter DLL, registration, activation
+command or live configuration. Recovery codes are not implemented. The ordinary
+Windows PIN remains available in the current release.
 
 ## Intended behavior
 
@@ -15,6 +17,38 @@ key verification and supplies it to the stock PIN provider. Removing or changing
 that credential breaks the bridge. Restricting its visible tile is a separate step.
 
 ## Candidate implementation
+
+### Isolated experiment
+
+Build with `tools/build.ps1`, then run:
+
+```powershell
+./build/Release/swa_filter_lab.exe --self-test
+./build/Release/swa_filter_lab.exe --inspect
+```
+
+The lab implements `ICredentialProviderFilter` inside an ordinary executable.
+Tests exercise simulated provider arrays; they do not invoke LogonUI or alter
+registration. The read-only inventory prints registered provider identifiers and
+identifies six convenience providers: current/legacy PIN, password, face,
+fingerprint and picture password. It does not inspect account or key profiles.
+Registration does not prove that a provider currently offers a usable tile.
+
+Disabled, diagnostic, invalid and unsupported cases preserve all decisions.
+Simulated restriction requires explicit recovery, account-scope and inventory
+preconditions, plus an available Sovereign entry. These booleans are test inputs,
+not evidence validators or a deployable activation mechanism. Recognized
+convenience entries are excluded only for local logon/unlock with zero flags.
+Unknown providers and exclusions made by other filters remain unchanged. Remote
+credential handling returns `E_NOTIMPL` without forwarding credentials.
+
+Local native compilation with warnings treated as errors and all four automated
+suites passed on Windows build 26200. This establishes interface/decision behavior
+in the lab, not hidden-PIN sign-in or recovery. An inventory on that machine also
+found unreviewed provider registrations; the experiment cannot claim complete
+key-only enforcement. The installed runtime hash remains unchanged.
+
+### Live implementation still pending
 
 A separately registered `ICredentialProviderFilter` can control which known
 providers LogonUI enumerates for `CPUS_LOGON` and `CPUS_UNLOCK_WORKSTATION`.
