@@ -146,5 +146,7 @@ in the installed Windows session.
 The user subsequently confirmed returning to normal Windows after this check.
 The photograph and confirmation establish the read-only recovery boot and return,
 not restoration of an active filter on the physical laptop. Physical restoration
-with a restriction installed, encrypted-volume recovery and hidden-PIN bridge
-validation remain pending.
+with a restriction installed, encrypted-volume recovery and physical hidden-PIN
+validation remain pending. The separate [VM bridge test](PIN_BRIDGE_VM.md) has
+since passed first sign-in, wrong-PIN rejection and unlock with the standard
+tiles hidden; it used a generated local-account PIN rather than real YubiKeys.

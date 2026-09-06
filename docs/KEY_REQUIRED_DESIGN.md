@@ -43,10 +43,12 @@ convenience entries are excluded only for local logon/unlock with zero flags.
 Unknown providers and exclusions made by other filters remain unchanged. Remote
 credential handling returns `E_NOTIMPL` without forwarding credentials.
 
-Local native compilation with warnings treated as errors and all seven automated
+Local native compilation with warnings treated as errors and all eight automated
 suites passed on Windows build 26200, including the optional VM DLL and offline
 recovery fixture. This establishes interface/decision behavior
-in the lab, not hidden-PIN sign-in. An inventory on that machine also
+in the lab. A separate [actual LogonUI bridge test](PIN_BRIDGE_VM.md) passed
+first sign-in, wrong-PIN refusal, and subsequent unlock with the standard tiles
+hidden in disposable Windows. An inventory on the physical machine also
 found unreviewed provider registrations; the experiment cannot claim complete
 key-only enforcement. The installed runtime hash remains unchanged.
 
@@ -58,14 +60,16 @@ The [paired USB extension](USB_RECOVERY.md) additionally passed missing/wrong US
 refusal, removal of the USB after verification, and recovery to an existing PIN
 that reached the desktop. Physical boot from the paired Corsair also passed its
 read-only Windows discovery and credential check. Restoring an active restriction
-on the physical laptop and hidden-PIN bridge validation are still pending.
+on the physical laptop and physical hidden-PIN validation are still pending.
 
 ### Physical implementation still pending
 
 A separately registered `ICredentialProviderFilter` can control which known
 providers LogonUI enumerates for `CPUS_LOGON` and `CPUS_UNLOCK_WORKSTATION`.
-The first experiment must establish that hiding the stock PIN tile still allows
-Sovereign to construct and use its provider internally. This is not yet tested.
+The disposable-VM experiment established that hiding the stock PIN tile still
+allows the production bridge to construct and use its provider internally on
+Windows build 26200. The fixture used a generated local-account PIN directly;
+the physical Microsoft-account and YubiKey path still needs a bounded trial.
 Do not remove the stock provider's COM registration or alter PIN enrollment.
 Default installation must leave filtering off. A diagnostic mode should report
 decisions without changing them or collecting account secrets.

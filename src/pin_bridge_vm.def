@@ -1,0 +1,4 @@
+LIBRARY SovereignPinBridgeVm
+EXPORTS
+ DllGetClassObject PRIVATE
+ DllCanUnloadNow PRIVATE
