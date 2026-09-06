@@ -90,3 +90,17 @@ Windows presented its normal PIN screen and the existing PIN reached the full
 desktop. The PIN, password, Sovereign and filter COM registrations were preserved;
 only the filter registration was removed. This establishes recovery for this
 tested missing-provider failure, not every possible Windows boot failure.
+
+The same filter was then installed on the enrolled Windows 11 Pro build 26200
+laptop after verifying its paired recovery USB and physically boot-tested recovery
+image. The existing provider binary and both encrypted key enrollments remained
+unchanged. The owner confirmed that both physical YubiKeys independently unlocked
+the laptop without PIN entry and that ordinary PIN/password options were absent.
+This physical result covers lock/unlock; reboot with the new filter and actual
+offline restoration of the physical laptop's filter are not yet recorded.
+The physical filter recorded mode 2, Sovereign present, and four identified
+alternatives excluded from twelve entries. Its provider binary still matched
+the pre-installation hash after the hardware tests.
+
+[GitHub CI for the implementation commit](https://github.com/VrtxOmega/sovereign-windows-auth/actions/runs/34012695678)
+passed its build, ten native suites and source checks on `bb50e8c`.
