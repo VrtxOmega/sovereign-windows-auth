@@ -56,8 +56,9 @@ machine after a loadable but unusable provider left no sign-in tile: WinPE recov
 restored ordinary password sign-in while preserving the other registrations.
 The [paired USB extension](USB_RECOVERY.md) additionally passed missing/wrong USB
 refusal, removal of the USB after verification, and recovery to an existing PIN
-that reached the desktop. Physical recovery and hidden-PIN bridge validation are
-still pending.
+that reached the desktop. Physical boot from the paired Corsair also passed its
+read-only Windows discovery and credential check. Restoring an active restriction
+on the physical laptop and hidden-PIN bridge validation are still pending.
 
 ### Physical implementation still pending
 

@@ -76,9 +76,10 @@ The program treats an existing but damaged pairing as an error. For legacy
 unpaired installations only, the original no-key offline removal command remains
 available. Supplying a key or using the graphical check always requires pairing.
 
-No filter is activated on the development laptop by this work. Physical USB boot,
-encrypted-volume recovery and the real provider's hidden-PIN compatibility must
-be validated before enabling key-required sign-in.
+No filter is activated on the development laptop by this work. Physical USB boot
+and credential verification have now passed. Restoring an active restriction on
+that hardware, encrypted-volume recovery and the real provider's hidden-PIN
+compatibility remain to be validated before enabling key-required sign-in.
 
 ## Validation on 2026-09-06 UTC
 
@@ -132,4 +133,17 @@ verified its existing paired USB, reporting that the filter remained absent.
 The offline restoration code and credential format were unchanged by the pairing
 access correction. The full removal/PIN-login test above used the earlier hashes.
 
-The physical Corsair boot path and encrypted-volume recovery remain untested.
+### Physical Corsair boot check
+
+The user supplied a photograph of the recovery screen running on the physical
+laptop after booting the Corsair. The screen found the offline installation at
+`E:\Windows`, verified the paired USB for that installation, reported that no
+Sovereign sign-in restriction was installed, and completed its check without
+changing the offline Windows installation. This confirms physical boot, storage
+discovery and USB authorization. Drive letters in recovery can differ from those
+in the installed Windows session.
+
+The photograph establishes the read-only check, not restoration of an active
+filter on the physical laptop. Return to normal Windows after this check has not
+yet been reported. Physical restoration with a restriction installed,
+encrypted-volume recovery and hidden-PIN bridge validation remain pending.
